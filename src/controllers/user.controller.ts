@@ -24,7 +24,6 @@ export const signUp = async (req: Request, res: Response) => {
         // Validate data comes in request body
         const valid = validate(req.body);               
         if(!valid) {
-            console.log("Errors: ", validate.errors);
             return sendBadRequestResponse(res, 'Parameters missing.', validate.errors);
         }
 
@@ -43,9 +42,6 @@ export const signUp = async (req: Request, res: Response) => {
             password: hashedPassword
         });
 
-        // Add user id into session
-        req.session.userId = newUser._id;
-
         sendOkResponse(res, 'You have successfully signed up!', newUser);
     } catch(err) {
         console.log('Error: ', err);
@@ -59,7 +55,6 @@ export const login = async (req: Request, res: Response) => {
         // Validate data comes in request body
         const valid = validate(req.body);               
         if(!valid) {
-            console.log("Errors: ", validate.errors);
             return sendBadRequestResponse(res, 'Parameters missing.', validate.errors);
         }
 
@@ -74,7 +69,7 @@ export const login = async (req: Request, res: Response) => {
         if(!passwordCheck) return sendBadRequestResponse(res, "Invalid credentials.");
 
         // Check if user has verified their account or not.
-        if(!user.isVerified) return sendBadRequestResponse(res, "You haven't verified your account. Please verify your account before logged in into the system.");
+        if(!user.isVerified) return sendBadRequestResponse(res, "You haven't verified your account. Please verify your account before login into the system.", user);
 
         // Add user id into session
         req.session.userId = user._id;
