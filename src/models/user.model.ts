@@ -1,24 +1,43 @@
-import { InferSchemaType, model, Schema } from 'mongoose';
+import { DataTypes } from 'sequelize';
+import db from './index';
 
-// export interface userInterface {
-//     email: String;
-//     password: String;
-//     isVerified: Boolean;
-//     isDeleted: Boolean;
-// }
-
-const userSchema = new Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true, select: false },
-    isVerified: { type: Boolean, required: true, default: false, select: false },
-    accountAccessCode: { type: String, required: false, select: false },
-    passwordRecoveryCode: { type: String, required: false, select: false },
-    isDeleted: { type: Boolean, required: true, default: false, select: false },
+export const User = db.sequelize.define('users', {
+    id: {
+        type: DataTypes.INTEGER(),
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    email: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    password: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    firstname: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    lastname: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    organistion_name: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    isVolunteer: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+    },
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    }
 }, {
-    timestamps: true
-});
-
-type User = InferSchemaType<typeof userSchema>;
-
-export default model<User>("User", userSchema);
-
+    tableName: 'users',
+    timestamp: true
+}); 
