@@ -32,6 +32,11 @@ export const User = db.sequelize.define('users', {
         type: DataTypes.BOOLEAN,
         allowNull: false
     },
+    isVerified: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
     isDeleted: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

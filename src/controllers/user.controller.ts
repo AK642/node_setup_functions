@@ -4,6 +4,11 @@ import { sendOkResponse, sendBadRequestResponse } from '../utils/http-status';
 import bcrypt from "bcrypt";
 import { User } from '../models/user.model';
 import { VolunteerInfo } from '../models/volunteer-info.model';
+import { emailVerificationMail } from '../utils/smtp-mails';
+import jwt from 'jwt-simple';
+import env from '../utils/validate-env';
+const tokenKey = env.TOKEN_KEY;
+
 
 // const ajv = new Ajv();
 
@@ -34,6 +39,7 @@ export const signUp = async (req: Request, res: Response) => {
         const existingUser = await User.findOne({ 
             where: {
                 email: objParams.email, 
+                isVolunteer: objParams.isVolunteer,
                 isDeleted: false
             }
         });
@@ -50,6 +56,7 @@ export const signUp = async (req: Request, res: Response) => {
         });
 
         // TODO: Send account verification mail here...
+        emailVerificationMail(newUser);
 
         // Add user id into session
         req.session.userId = newUser.id;
@@ -60,6 +67,35 @@ export const signUp = async (req: Request, res: Response) => {
         sendBadRequestResponse(res);
     }
 };
+
+/** GET API: Verify account API to validate account */
+export const verifyAccount = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.query; 
+
+        const data = jwt.decode(token as string, tokenKey);
+        console.log('data: ', data);
+
+        if(!data) return res.send("Invalid token!");
+
+        const user  = await User.findOne({
+            where: {
+                email: data,
+                isDeleted: false
+            }
+        });
+        if(!user) return res.send("User with this email address doesn't exists.");
+
+        if(user.isVerified) return res.send("Your account is already verified!");
+
+        user.isVerified = true;
+        await user.save();
+        res.send("Your account has been verified successfully.");
+    } catch(err) {
+        console.log("Error: ", err);
+        res.send("Something went wrong, please try again later.")
+    }
+}
 
 /** POST API: Login with the email and password into the system */
 export const login = async (req: Request, res: Response) => {
